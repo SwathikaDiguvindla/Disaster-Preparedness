@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Virtual Disaster Twin — Demo</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --panel:#ffffff; --accent:#1f78d1; --danger:#d9534f; --ok:#28a745;
+    --muted:#6b7280; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body{height:100%; margin:0; background:linear-gradient(180deg,#eef6ff,#f4f7fb); color:#111}
+  .container{max-width:1100px; margin:18px auto; padding:18px;}
+  header{display:flex; gap:12px; align-items:center; margin-bottom:12px;}
+  h1{font-size:20px; margin:0; color:var(--accent)}
+  .controls, .panels{display:flex; gap:12px; align-items:flex-start;}
+  .controls{margin-bottom:12px;}
+  .card{background:var(--panel); box-shadow:0 6px 18px rgba(20,30,60,0.06); border-radius:12px; padding:12px;}
+  .left{width:640px}
+  canvas{background:#e6f2ff; border-radius:8px; display:block; width:100%; height:auto; border:2px solid rgba(31,120,209,0.06);}
+  .right{flex:1; min-width:320px}
+  label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px}
+  input[type="text"]{width:100%; padding:8px; border-radius:8px; border:1px solid #d6dbe6; font-size:14px}
+  select, button{padding:8px 10px; border-radius:8px; border:1px solid #d6dbe6; font-weight:600; cursor:pointer; background:white}
+  button.primary{background:var(--accent); color:white; border-color:var(--accent)}
+  button.warn{background:var(--danger); color:white; border-color:var(--danger)}
+  .ai-box{min-height:120px; margin-top:10px; padding:8px; border-radius:8px; background:linear-gradient(180deg,#fbfdff,#ffffff); border:1px solid #eef3fb}
+  .msg{padding:6px 8px; margin:6px 0; border-radius:6px; font-size:14px}
+  .msg.good{background:#e6fbef; color:var(--ok)}
+  .msg.bad{background:#fff2f2; color:var(--danger)}
+  .actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+  .score{font-size:16px; font-weight:700; color:var(--accent)}
+  .map-legend{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+  .legend-item{display:flex; gap:6px; align-items:center; font-size:13px}
+  .dot{width:14px;height:14px;border-radius:4px; display:inline-block}
+  .btn-ctrls{display:flex; gap:6px; margin-top:8px}
+  .small{font-size:12px; color:var(--muted)}
+  .teacher-panel{margin-top:12px; padding:8px; border-radius:8px; background:#fff}
+  .table{width:100%; border-collapse:collapse; font-size:13px}
+  .table th,.table td{padding:6px 8px; border-bottom:1px solid #eef3fb; text-align:left}
+  .controls-row{display:flex; gap:8px; align-items:center}
+  .touch-pad{display:flex; gap:6px; margin-top:8px}
+  .touch-pad button{flex:1}
+  @media(max-width:980px){ .left{width:100%} .controls,.panels{flex-direction:column} .right{min-width:unset} }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Virtual Disaster Twin — Demo</h1>
+      <div class="small">Practice disaster drills in a safe virtual campus</div>
+    </header>
+
+    <div class="controls">
+      <div class="card left">
+        <canvas id="map" width="640" height="420" aria-label="Campus map"></canvas>
+        <div class="map-legend">
+          <div class="legend-item"><span class="dot" style="background:#ffffff;border:2px solid #333"></span> You (blue)</div>
+          <div class="legend-item"><span class="dot" style="background:#ff9f1c"></span> Fire / Hazard</div>
+          <div class="legend-item"><span class="dot" style="background:#90ee90"></span> Assembly Point</div>
+          <div class="legend-item"><span class="dot" style="background:#7aa2ff"></span> Exit</div>
+        </div>
+      </div>
+
+      <div class="card right">
+        <label>Student Name / Roll No.</label>
+        <input id="studentName" type="text" placeholder="e.g., A. Kumar or 10A-05" />
+
+        <div style="display:flex; gap:8px; margin-top:8px; align-items:center">
+          <div style="flex:1">
+            <label>Scenario</label>
+            <select id="scenario">
+              <option value="earthquake">Earthquake</option>
+              <option value="fire">Fire</option>
+              <option value="flood">Flood</option>
+            </select>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="startBtn" class="primary">Start Drill</button>
+          </div>
+        </div>
+
+        <div class="ai-box" aria-live="polite" id="coachBox">
+          <div><strong>AI Coach:</strong></div>
+          <div id="coachMsg" class="small">Choose scenario and press Start Drill. Use arrow keys to move. Available actions appear below when relevant.</div>
+        </div>
+
+        <div class="actions" id="actionButtons">
+          <button id="dropBtn" disabled>Drop / Cover / Hold</button>
+          <button id="evacBtn" disabled>Evacuate</button>
+          <button id="helpBtn" disabled>Help Friend</button>
+          <button id="extBtn" disabled>Use Extinguisher</button>
+          <button id="callBtn" disabled>Call 112</button>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:10px; align-items:center">
+          <div>Score: <span class="score" id="score">0</span></div>
+          <div class="small" id="statusText">Status: Idle</div>
+        </div>
+
+        <div class="btn-ctrls">
+          <button id="resetBtn">Reset</button>
+          <button id="saveBtn">Save Attempt</button>
+          <button id="teacherBtn">Teacher Dashboard</button>
+        </div>
+
+        <div class="teacher-panel" id="teacherPanel" style="display:none">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <strong>Saved Attempts (this browser)</strong>
+            <button id="closeTeacher">Close</button>
+          </div>
+          <table class="table" id="attemptTable" style="margin-top:8px">
+            <thead><tr><th>Student</th><th>Scenario</th><th>Score</th><th>Time</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div style="margin-top:8px" class="small">Note: This demo stores attempts locally in this browser (localStorage).</div>
+        </div>
+
+        <div class="touch-pad" id="touchPad" style="display:none">
+          <button id="upBtn">▲</button>
+          <button id="leftBtn">◀</button>
+          <button id="downBtn">▼</button>
+          <button id="rightBtn">▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+ Virtual Disaster Twin — MVP Demo
+ - Map: simple rooms + exits + assembly point
+ - Player: move with arrow keys, actions via buttons
+ - Scenarios: earthquake, fire, flood
+ - Rule-based AI Coach & scoring
+ - Local storage for attempts
+*/
+
+// ---------- Map & Entities ----------
+const canvas = document.getElementById('map');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+const mapConfig = {
+  rooms: [
+    {x:20,y:20,w:280,h:180, name:'Classroom A'},
+    {x:340,y:20,w:280,h:180, name:'Laboratory'},
+    {x:20,y:230,w:280,h:160, name:'Cafeteria'},
+    {x:340,y:230,w:280,h:160, name:'Hall / Exit'}
+  ],
+  exits: [{x:560,y:310,w:40,h:40}],
+  assembly: {x:540,y:80,w:60,h:60}
+};
+
+let player = {x:80,y:90,r:10, speed:3};
+let scenario = 'earthquake';
+let running = false;
+let state = {
+  shaking:false,
+  fireSources: [], // list of {x,y,radius,active}
+  waterLevel:0,
+  timeElapsed:0,
+  startedAt: null
+};
+let score = 0;
+let messages = [];
+
+// ---------- UI Elements ----------
+const studentNameEl = document.getElementById('studentName');
+const scenarioEl = document.getElementById('scenario');
+const startBtn = document.getElementById('startBtn');
+const coachMsg = document.getElementById('coachMsg');
+const coachBox = document.getElementById('coachBox');
+
+const dropBtn = document.getElementById('dropBtn');
+const evacBtn = document.getElementById('evacBtn');
+const helpBtn = document.getElementById('helpBtn');
+const extBtn = document.getElementById('extBtn');
+const callBtn = document.getElementById('callBtn');
+
+const scoreEl = document.getElementById('score');
+const statusText = document.getElementById('statusText');
+
+const resetBtn = document.getElementById('resetBtn');
+const saveBtn = document.getElementById('saveBtn');
+const teacherBtn = document.getElementById('teacherBtn');
+const teacherPanel = document.getElementById('teacherPanel');
+const attemptTableBody = document.querySelector('#attemptTable tbody');
+const closeTeacher = document.getElementById('closeTeacher');
+
+const touchPad = document.getElementById('touchPad');
+const upBtn = document.getElementById('upBtn');
+const downBtn = document.getElementById('downBtn');
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+
+// ---------- Helpers ----------
+function pushMsg(text, ok=true) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + (ok ? 'good' : 'bad');
+  div.textContent = text;
+  // append to coach box
+  coachMsg.parentElement.appendChild(div);
+  coachMsg.style.display = 'none';
+  // remove old messages after 6 secs
+  setTimeout(()=>div.remove(), 6000);
+}
+function setCoach(text, ok=true){
+  coachMsg.textContent = text;
+  // also small color hint
+  coachMsg.style.color = ok ? 'var(--ok)' : 'var(--danger)';
+}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function rectContains(r,x,y){ return x>=r.x && x<=r.x+r.w && y>=r.y && y<=r.y+r.h; }
+function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+
+// ---------- Draw map ----------
+function drawMap(){
+  ctx.clearRect(0,0,W,H);
+
+  // rooms
+  ctx.font = '14px Inter';
+  mapConfig.rooms.forEach((r)=>{
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#bcd9ff';
+    roundRect(ctx, r.x, r.y, r.w, r.h, 10);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#1f78d1';
+    ctx.fillText(r.name, r.x + 10, r.y + 20);
+  });
+
+  // exits
+  mapConfig.exits.forEach(e=>{
+    ctx.fillStyle = '#7aa2ff';
+    roundRect(ctx,e.x,e.y,e.w,e.h,8); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.fillText('Exit', e.x+4, e.y+24);
+  });
+
+  // assembly
+  const a = mapConfig.assembly;
+  ctx.fillStyle = '#90ee90';
+  roundRect(ctx,a.x,a.y,a.w,a.h,8); ctx.fill();
+  ctx.fillStyle='#066'; ctx.fillText('Assembly', a.x+6, a.y+34);
+
+  // hazards: fire
+  state.fireSources.forEach(f=>{
+    ctx.save();
+    // radial smoke / fire
+    const g = ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,f.radius);
+    g.addColorStop(0,'rgba(255,120,40,0.9)');
+    g.addColorStop(0.6,'rgba(255,120,40,0.5)');
+    g.addColorStop(1,'rgba(0,0,0,0.05)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(f.x,f.y,f.radius,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#ff9f1c';
+    ctx.beginPath(); ctx.arc(f.x,f.y,8,0,Math.PI*2); ctx.fill();
+  });
+
+  // water (flood) overlay
+  if(state.waterLevel>0){
+    ctx.fillStyle = 'rgba(60,140,220,0.12)';
+    ctx.fillRect(0, H - (H * state.waterLevel), W, H * state.waterLevel);
+    ctx.fillStyle = '#055'; ctx.font='12px Inter';
+    ctx.fillText('Water rising', 12, H - (H * state.waterLevel) - 6);
+  }
+
+  // player
+  ctx.save();
+  // on earthquake: draw shaking effect by translating slightly
+  if(state.shaking){
+    const sx = (Math.random()-0.5)*8;
+    const sy = (Math.random()-0.5)*8;
+    ctx.translate(sx, sy);
+  }
+  ctx.fillStyle = '#1f78d1';
+  ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font='12px Inter';
+  ctx.fillText('You', player.x - 10, player.y - 16);
+  ctx.restore();
+
+  // time/score overlay
+  ctx.fillStyle='rgba(0,0,0,0.05)';
+  ctx.fillRect(6, H-28, 220, 22);
+  ctx.fillStyle='#000'; ctx.font='12px Inter';
+  ctx.fillText(`Time: ${formatTime(state.timeElapsed)}  Score: ${score}`, 12, H-12);
+}
+
+// nice rounded rect helper
+function roundRect(ctx,x,y,w,h,r){
+  const min = Math.min(w/2,h/2);
+  if(r>min) r=min;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+// ---------- Simulation control ----------
+function startDrill(){
+  const name = (studentNameEl.value||'Student').trim();
+  scenario = scenarioEl.value;
+  running = true;
+  score = 0; state.timeElapsed = 0; state.startedAt = Date.now();
+  messages = [];
+  coachMsg.style.display = 'block';
+  setCoach(`Drill started: ${scenario.toUpperCase()}. Follow AI Coach instructions.`, true);
+  statusText.textContent = `Drill: ${scenario}`;
+  // enable action buttons
+  dropBtn.disabled = false; evacBtn.disabled = false; helpBtn.disabled = false; callBtn.disabled=false;
+  extBtn.disabled = (scenario !== 'fire');
+
+  // initialize scenario specifics
+  if(scenario === 'earthquake'){
+    // schedule shake for 6 seconds
+    state.shaking = true;
+    pushMsg('Earthquake! Drop, Cover and Hold. Click "Drop / Cover / Hold" or press D.', true);
+    setTimeout(()=>{
+      state.shaking = false;
+      pushMsg('Shaking stopped — evacuate calmly to the assembly area (green).', true);
+      setCoach('Evacuate now to the assembly point. Avoid lifts and windows.', true);
+    }, 6000);
+  } else if(scenario === 'fire'){
+    // create a fire in lab area
+    const lab = mapConfig.rooms[1];
+    const fx = lab.x + lab.w/2, fy = lab.y + lab.h/2;
+    state.fireSources = [{x:fx,y:fy,radius:30,active:true}];
+    pushMsg('Fire reported in the Laboratory. Use extinguisher if nearby OR evacuate. Call 112 if dangerous.', false);
+    setCoach('Avoid smoke; try to extinguish only if safe. Otherwise evacuate to assembly point.', true);
+    // gradually expand smoke
+    const expand = setInterval(()=>{
+      state.fireSources.forEach(f=>f.radius+=3);
+    }, 1500);
+    // stop expansion after 18s
+    setTimeout(()=>clearInterval(expand), 18000);
+  } else if(scenario === 'flood'){
+    state.waterLevel = 0;
+    pushMsg('Flood risk: water will rise slowly. Move to higher ground (assembly point).', false);
+    setCoach('Move to assembly area quickly. Avoid low corridors.', true);
+    // slowly raise water
+    const raise = setInterval(()=>{
+      state.waterLevel = clamp(state.waterLevel + 0.02, 0, 0.6);
+    }, 1000);
+    setTimeout(()=>clearInterval(raise), 20000);
+  }
+
+  // start main tick
+  tickInterval = setInterval(tick, 100);
+}
+
+function resetDrill(){
+  running = false; state = {shaking:false, fireSources:[], waterLevel:0, timeElapsed:0, startedAt:null}; score = 0;
+  player.x = 80; player.y = 90;
+  setCoach('Reset. Choose scenario and press Start Drill.', true);
+  statusText.textContent = 'Status: Idle';
+  dropBtn.disabled = true; evacBtn.disabled = true; helpBtn.disabled = true; extBtn.disabled = true; callBtn.disabled = true;
+  clearInterval(tickInterval);
+  drawMap();
+}
+
+// ---------- Tick loop ----------
+let tickInterval = null;
+function tick(){
+  if(!running) return;
+  state.timeElapsed = Math.floor((Date.now() - state.startedAt)/1000);
+  // check hazards collisions
+  if(scenario === 'fire'){
+    for(const f of state.fireSources){
+      const d = Math.hypot(player.x - f.x, player.y - f.y);
+      if(d < f.radius + 6 && f.active){
+        // inside hazard
+        setCoach('You are in a smoke/hot zone — move away or use extinguisher if close and safe.', false);
+        // penalize if staying inside
+        score = Math.max(0, score - 1);
+      }
+    }
+  }
+
+  // flood: if waterLevel high and player in low area -> penalty
+  if(scenario === 'flood' && state.waterLevel > 0.25){
+    // if player y is low (below mid map), penalty
+    if(player.y > H*0.6){
+      score = Math.max(0, score - 1);
+      setCoach('Water level high near you — move to assembly (higher area).', false);
+    }
+  }
+
+  // if player reached assembly after scenario end -> reward
+  const a = mapConfig.assembly;
+  if(player.x > a.x && player.x < a.x + a.w && player.y > a.y && player.y < a.y + a.h){
+    // if drill active and either shaking ended or fire active => success condition
+    if(scenario === 'earthquake' && !state.shaking){
+      setCoach('Reached assembly — good evacuation!', true);
+      score += 30;
+      endDrill(true);
+    } else if(scenario === 'fire'){
+      // if near smoke still, still a success to be safe
+      setCoach('Reached assembly — well done!', true);
+      score += 25;
+      endDrill(true);
+    } else if(scenario === 'flood'){
+      setCoach('Reached assembly (higher ground) — good!', true);
+      score += 25;
+      endDrill(true);
+    }
+  }
+
+  scoreEl.textContent = score;
+  drawMap();
+}
+
+function endDrill(success){
+  if(!running) return;
+  running = false;
+  dropBtn.disabled = true; evacBtn.disabled = true; helpBtn.disabled = true; extBtn.disabled = true; callBtn.disabled = true;
+  statusText.textContent = success ? 'Drill complete' : 'Drill stopped';
+  setCoach(success ? 'Drill completed successfully. Save your attempt.' : 'Drill ended.');
+  clearInterval(tickInterval);
+}
+
+// ---------- Actions (buttons) ----------
+dropBtn.addEventListener('click', ()=>{
+  if(!running) return;
+  if(scenario === 'earthquake' && state.shaking){
+    score += 15;
+    pushMsg('Good: You dropped, covered, and held during shaking!', true);
+    setCoach('Hold your position until shaking stops. Then evacuate calmly.', true);
+  } else {
+    pushMsg('Drop/Cover helpful only during shaking. Use Evacuate as needed.', false);
+  }
+  scoreEl.textContent = score;
+});
+
+evacBtn.addEventListener('click', ()=>{
+  if(!running) return;
+  // move player toward assembly automatically
+  setCoach('Evacuating automatically to assembly point.', true);
+  const a = mapConfig.assembly;
+  // animate movement with interval
+  const id = setInterval(()=>{
+    const dx = a.x + a.w/2 - player.x;
+    const dy = a.y + a.h/2 - player.y;
+    const d = Math.hypot(dx,dy);
+    if(d < 6){
+      clearInterval(id);
+      score += 6;
+      scoreEl.textContent = score;
+      // tick() will catch arrival
+    } else {
+      player.x += (dx/d)*3; player.y += (dy/d)*3;
+    }
+    drawMap();
+  }, 40);
+});
+
+helpBtn.addEventListener('click', ()=>{
+  if(!running) return;
+  setCoach('You signaled to help—good community action. +5 points if you are safe.', true);
+  score += 5; scoreEl.textContent = score;
+});
+
+extBtn.addEventListener('click', ()=>{
+  if(!running) return;
+  if(scenario !== 'fire'){
+    pushMsg('Extinguisher not applicable for this scenario.', false);
+    return;
+  }
+  // if near fire
+  if(state.fireSources.length && Math.hypot(player.x - state.fireSources[0].x, player.y - state.fireSources[0].y) < 80){
+    setCoach('You successfully used the extinguisher on the fire source. +20', true);
+    score += 20;
+    state.fireSources[0].active = false;
+    // small visual change
+    state.fireSources = [];
+  } else {
+    pushMsg('Too far from the fire to use an extinguisher. Do not approach if unsafe.', false);
+    score = Math.max(0, score - 5);
+  }
+  scoreEl.textContent = score;
+});
+
+callBtn.addEventListener('click', ()=>{
+  if(!running) return;
+  setCoach('Emergency number called. Inform authorities of location and hazard. +3', true);
+  score += 3; scoreEl.textContent = score;
+});
+
+// ---------- Movement controls ----------
+const keys = {};
+window.addEventListener('keydown', (e)=>{
+  if(e.key === 'ArrowUp' || e.key === 'w') keys.up = true;
+  if(e.key === 'ArrowDown' || e.key === 's') keys.down = true;
+  if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+  if(e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+  if(e.key === 'd' || e.key==='D') { /* drop shortcut */ }
+});
+window.addEventListener('keyup', (e)=>{
+  if(e.key === 'ArrowUp' || e.key === 'w') keys.up = false;
+  if(e.key === 'ArrowDown' || e.key === 's') keys.down = false;
+  if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+  if(e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+});
+
+function movementTick(){
+  if(keys.up) player.y -= player.speed;
+  if(keys.down) player.y += player.speed;
+  if(keys.left) player.x -= player.speed;
+  if(keys.right) player.x += player.speed;
+  // boundary clamp
+  player.x = clamp(player.x, 12, W-12);
+  player.y = clamp(player.y, 12, H-12);
+}
+setInterval(movementTick, 30);
+
+// touch buttons
+upBtn?.addEventListener('mousedown', ()=>{ keys.up = true; });
+upBtn?.addEventListener('mouseup', ()=>{ keys.up = false; });
+downBtn?.addEventListener('mousedown', ()=>{ keys.down = true; });
+downBtn?.addEventListener('mouseup', ()=>{ keys.down = false; });
+leftBtn?.addEventListener('mousedown', ()=>{ keys.left = true; });
+leftBtn?.addEventListener('mouseup', ()=>{ keys.left = false; });
+rightBtn?.addEventListener('mousedown', ()=>{ keys.right = true; });
+rightBtn?.addEventListener('mouseup', ()=>{ keys.right = false; });
+
+// ---------- Save / Teacher dashboard ----------
+function saveAttempt(){
+  const name = (studentNameEl.value||'Student').trim();
+  const data = JSON.parse(localStorage.getItem('vdt_attempts') || '[]');
+  data.push({
+    student: name, scenario: scenario, score: score, time: new Date().toLocaleString()
+  });
+  localStorage.setItem('vdt_attempts', JSON.stringify(data));
+  setCoach('Attempt saved locally. Teacher can view dashboard.', true);
+  loadAttempts();
+}
+function loadAttempts(){
+  const data = JSON.parse(localStorage.getItem('vdt_attempts') || '[]');
+  attemptTableBody.innerHTML = '';
+  data.slice().reverse().forEach(row=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(row.student)}</td><td>${escapeHtml(row.scenario)}</td><td>${row.score}</td><td>${row.time}</td>`;
+    attemptTableBody.appendChild(tr);
+  });
+}
+
+// ---------- Utility ----------
+function formatTime(s){
+  const mm = String(Math.floor(s/60)).padStart(2,'0');
+  const ss = String(s%60).padStart(2,'0');
+  return `${mm}:${ss}`;
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+// ---------- UI wiring ----------
+startBtn.addEventListener('click', ()=>{
+  if(running){
+    pushMsg('A drill is already running. Reset first.', false);
+    return;
+  }
+  startDrill();
+});
+
+resetBtn.addEventListener('click', ()=>{
+  resetDrill();
+});
+
+saveBtn.addEventListener('click', saveAttempt);
+
+teacherBtn.addEventListener('click', ()=>{
+  teacherPanel.style.display = 'block';
+  loadAttempts();
+});
+closeTeacher.addEventListener('click', ()=>teacherPanel.style.display = 'none');
+
+// responsive: show touch pad on small screens
+function detectTouchSupport(){
+  if('ontouchstart' in window || navigator.maxTouchPoints>0){
+    touchPad.style.display = 'flex';
+  }
+}
+detectTouchSupport();
+
+// basic autoplay draw
+drawMap();
+
+// call tick() periodically even if not started to update map
+setInterval(()=>{ if(!running) drawMap(); }, 500);
+
+</script>
+</body>
+</html>

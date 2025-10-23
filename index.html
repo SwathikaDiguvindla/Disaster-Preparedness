@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Disaster Preparedness & Response Education</title>
+  <style>
+    body { margin:0; font-family:Inter, Arial, sans-serif; background:#f4f9ff; color:#111 }
+    header { background:#004080; color:#fff; padding:14px 18px; display:flex; align-items:center; gap:12px; }
+    .hamburger{font-size:22px;cursor:pointer; user-select:none}
+    .title { font-size:18px; font-weight:700; }
+    .sidebar{height:100%; width:0; position:fixed; top:0; left:0; background:#003366; overflow-x:hidden; transition:0.3s; padding-top:60px; z-index:1200}
+    .sidebar a{display:block; padding:12px 18px; color:#f4f9ff; text-decoration:none; font-size:16px}
+    .sidebar a:hover{background:#0256a1}
+    .closebtn{position:absolute; right:14px; top:10px; font-size:26px; color:#fff; cursor:pointer}
+    main{max-width:1100px; margin:18px auto; padding:12px}
+    .section{background:#fff; border-radius:10px; padding:14px; margin-bottom:18px; box-shadow:0 6px 18px rgba(20,30,60,0.06)}
+    h2{color:#004080; margin:6px 0 12px 0}
+    .guidelines ul{margin:6px 0 0 18px}
+    iframe { width:100%; border-radius:8px; height:260px; border:0 }
+    .row{display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap}
+    .col{flex:1; min-width:260px}
+    .images-grid{display:flex; gap:8px; flex-wrap:wrap}
+    .images-grid img{width:160px; height:100px; object-fit:cover; border-radius:6px; border:1px solid #e6eefc}
+    .extra{margin-top:12px; padding:10px; background:linear-gradient(180deg,#fbfdff,#fff); border-radius:8px; border:1px solid #eef3fb}
+    .list-links{margin:8px 0}
+    .list-links a{display:block; margin:6px 0; color:#0073e6; text-decoration:none}
+    .list-links a:hover{text-decoration:underline}
+    /* quiz */
+    .quiz-box{margin-top:10px; padding:12px; border-radius:8px; border:2px solid #1f78d1; background:#f9fbff}
+    .level-info{font-weight:700; color:#0b4a83; margin-bottom:8px}
+    .question{font-weight:700; margin-bottom:8px}
+    .options{display:flex; flex-direction:column; gap:8px}
+    .opt-btn{padding:10px 12px; background:#eef8ff; border:1px solid #bcd9ff; border-radius:8px; cursor:pointer; text-align:left}
+    .opt-btn:hover{background:#e0f0ff}
+    .scoreline{margin-top:8px; font-weight:700; color:#0b4a83}
+    /* game */
+    .game-box{margin-top:12px; padding:12px; border-radius:8px; border:2px dashed #1f78d1; background:#fff8e6}
+    .game-btn{padding:10px 12px; background:#1f78d1; color:white; border:none; border-radius:8px; cursor:pointer}
+    .game-btn:hover{opacity:0.95}
+    .small{font-size:13px; color:#6b7280}
+    @media(max-width:880px){ .row{flex-direction:column} .images-grid img{width:48%; height:120px} }
+  </style>
+</head>
+<body>
+  <header>
+     <header>
+  <span class="hamburger" onclick="openSidebar()">☰</span>
+  
+  <!-- Punjab Govt Logo -->
+  <img src= "C:\Users\swath\OneDrive\Documents\SIH\disaster logo.jpeg" alt="Disaster Preparedness"
+       style="height:40px; width:auto; border-radius:4px;">
+       
+  <div class="title">Disaster Preparedness & Response Education</div>
+  
+  <div style="margin-left:auto" class="small">Practice drills, quizzes & mini-games (offline)</div>
+</header>
+
+  </header>
+
+  <nav id="mySidebar" class="sidebar" aria-hidden="true">
+    <span class="closebtn" onclick="closeSidebar()">×</span>
+    <a href="#" onclick="showScenario('ai')">AI Mode</a>
+    <a href="#" onclick="showScenario('all')">All</a>
+    <a href="#" onclick="startQuiz('earthquake')">Earthquake</a>
+    <a href="#" onclick="startQuiz('flood')">Flood</a>
+    <a href="#" onclick="startQuiz('fire')">Fire</a>
+  </nav>
+
+  <main>
+    <!-- AI Mode (kept minimal) -->
+    <section id="ai" class="section" style="display:none">
+      <h2>AI Mode</h2>
+      <p class="small">AI-assisted guidance (local demo). In production you can connect to a knowledge API to dynamically generate scenario questions and tips for each student.</p>
+    </section>
+
+    <!-- ALL view (shows everything together) -->
+    <section id="all" class="section" style="display:none">
+      <h2>All Resources</h2>
+      <p class="small">Choose a topic from the menu to focus on its quizzes and games. This combined view shows top-level resources for earthquakes, floods and fires.</p>
+      <div class="row">
+        <div class="col section" style="min-width:300px">
+          <h3 style="margin-top:0">Earthquake — Quick</h3>
+          <ul class="guidelines">
+            <li>Drop, Cover and Hold On</li>
+            <li>Go to open assembly area when safe</li>
+          </ul>
+          <div class="small"><a href="#" onclick="startQuiz('earthquake')">Start Earthquake Quiz</a></div>
+        </div>
+
+        <div class="col section" style="min-width:300px">
+          <h3 style="margin-top:0">Flood — Quick</h3>
+          <ul class="guidelines">
+            <li>Move to higher ground</li>
+            <li>Avoid driving / walking through floodwater</li>
+          </ul>
+          <div class="small"><a href="#" onclick="startQuiz('flood')">Start Flood Quiz</a></div>
+        </div>
+
+        <div class="col section" style="min-width:300px">
+          <h3 style="margin-top:0">Fire — Quick</h3>
+          <ul class="guidelines">
+            <li>Stop, Drop and Roll</li>
+            <li>Use stairs — never elevators</li>
+          </ul>
+          <div class="small"><a href="#" onclick="startQuiz('fire')">Start Fire Quiz</a></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EARTHQUAKE -->
+    <section id="earthquake" class="section" style="display:none" aria-labelledby="earthquake">
+      <h2>Earthquake — Safety & Resources</h2>
+
+      <div class="row">
+        <div class="col">
+          <div class="guidelines">
+            <h4 style="margin:6px 0">Safety Guidelines</h4>
+            <ul>
+              <li>Drop, Cover and Hold On while shaking.</li>
+              <li>Stay away from windows and heavy fixtures; protect your head.</li>
+              <li>When shaking stops, evacuate to the assembly point and wait for instructions.</li>
+            </ul>
+          </div>
+
+          <div class="extra" style="margin-top:10px">
+            <h4 style="margin:6px 0">Images</h4>
+            <div class="images-grid" id="earthquake-images">
+              <img src="C:\Users\swath\OneDrive\Documents\quake1.jpg" alt="quake1">
+              <img src="C:\Users\swath\OneDrive\Documents\quake2.jpg" alt="quake2">
+              <img src="C:\Users\swath\OneDrive\Documents\quake3.jpg" alt="quake3">
+            </div>
+          </div>
+
+          <div class="extra" style="margin-top:10px">
+            <h4 style="margin:6px 0">Videos</h4>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px">
+  <iframe width="100%" height="260"
+    src="https://www.youtube.com/embed/MKILThtPxQs?si=lEMR6KiCWdc8CgO7"
+    title="Earthquake Safety Video"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen>
+  </iframe>
+</div>
+
+<div style="flex:1; min-width:260px">
+  <iframe width="100%" height="260"
+    src="https://www.youtube.com/embed/90z5oU1WNTc"  
+    title="Drop, Cover & Hold Drill"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen>
+  </iframe>
+</div>
+ 
+
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="extra">
+            <h4 style="margin:6px 0">Latest News</h4>
+            <div class="list-links" id="earthquake-news">
+              <a href="https://www.bbc.com/news/topics/cz4pr2gd3rqt/earthquakes" target="_blank" rel="noopener">BBC — Earthquake coverage</a>
+              <a href="https://www.reuters.com/places/world/earthquake" target="_blank" rel="noopener">Reuters — Earthquake news</a>
+              <a href="https://www.ndma.gov.in" target="_blank" rel="noopener">National Disaster Management Authority (India)</a>
+            </div>
+          </div>
+
+          <div class="extra" style="margin-top:12px">
+            <h4 style="margin:6px 0">Books & Resources</h4>
+            <div class="list-links">
+              <a href="https://en.wikipedia.org/wiki/Earthquake_engineering" target="_blank" rel="noopener">Earthquake engineering — Wikipedia</a>
+              <a href="https://www.ready.gov/earthquakes" target="_blank" rel="noopener">Ready.gov — Earthquake preparedness</a>
+              <a href="https://www.amazon.in/s?k=earthquake+preparedness" target="_blank" rel="noopener">Books: Earthquake preparedness (Amazon)</a>
+            </div>
+          </div>
+          
+  
+    
+          <div class="extra" style="margin-top:12px">
+            <h4 style="margin:6px 0">Quiz & Game</h4>
+            <div id="quake-game" class="game-box" style="margin-top:10px">
+  <h4 style="margin:6px 0">Mini Game — Earthquake Safety Drill</h4>
+  <p class="small">Practice Drop, Cover, and Hold actions in a safe environment.</p>
+  <button class="game-btn"
+    onclick="document.getElementById('quakeFrame').style.display='block'; document.getElementById('quakeFrame').src='web.html'">
+    Start Game
+  </button>
+  <iframe id="quakeFrame" style="width:100%; height:500px; border:none; margin-top:10px; display:none;"></iframe>
+</div>
+          </div>
+          <div class="extra" style="margin-top:12px">
+  <h4 style="margin:6px 0">Emergency Contacts</h4>
+  <ul style="margin:6px 0 0 18px; line-height:1.6">
+    <li><b>National Emergency Number:</b> 112</li>
+    <li><b>Ambulance:</b> 102 / 108</li>
+    <li><b>Disaster Management (NDMA):</b> 011-26701728 / 26701729</li>
+    <li><b>Police Helpline:</b> 100</li>
+    <li><b>State Helpline (Punjab):</b> 181</li>
+  </ul>
+</div>
+<div class="extra" style="margin-top:12px">
+  <h4>Emergency Contact</h4>
+  <button class="game-btn" onclick="location.href='tel:112'">🚨 SOS — Call Emergency</button>
+  <p class="small">Tap to call the emergency services immediately</p>
+</div>
+
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOOD -->
+    <section id="flood" class="section" style="display:none">
+      <h2>Flood — Safety & Resources</h2>
+
+      <div class="row">
+        <div class="col">
+          <div class="guidelines">
+            <h4 style="margin:6px 0">Safety Guidelines</h4>
+            <ul>
+              <li>Move to higher ground immediately on flood warnings.</li>
+              <li>Do not walk or drive through moving water — six inches can knock you down.</li>
+              <li>Keep an emergency kit with water, medicines and torch.</li>
+            </ul>
+          </div>
+
+          <div class="extra" style="margin-top:10px">
+            <h4 style="margin:6px 0">Images</h4>
+            <div class="images-grid" id="flood-images">
+              <img src="C:\Users\swath\OneDrive\Documents\flood3.jpg" alt="flood1">
+              <img src= "C:\Users\swath\OneDrive\Documents\flood2.jpg"alt="flood2">
+              <img src="C:\Users\swath\OneDrive\Documents\flood1.jpg" alt="flood3">
+            </div>
+          </div>
+
+          <div class="extra" style="margin-top:10px">
+            <h4 style="margin:6px 0">Videos</h4>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <div class="extra" style="margin-top:10px">
+  <h4 style="margin:6px 0">Videos</h4>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+    <!-- Flood Safety Tips -->
+    <div style="flex:1; min-width:260px">
+      <iframe width="100%" height="260"
+        src="https://www.youtube.com/embed/dbMCikM1gYI?si=UBfO_7SQQn78I6PK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+        title="Flood Safety Tips"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <!-- Avoid Flood Dangers -->
+    <div style="flex:1; min-width:260px">
+      <iframe width="100%" height="260"
+        src="https://www.youtube.com/embed/WtUYQZuZ4tU?si=q8I_c6Q3RGLpYTws" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+        title="Avoid Flood Dangers"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+  </div>
+</div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="extra">
+            <h4 style="margin:6px 0">Latest News</h4>
+            <div class="list-links" id="flood-news">
+              <a href="https://www.bbc.com/news/topics/cz4pr2gd3rqt/floods" target="_blank" rel="noopener">BBC — Flood updates</a>
+              <a href="https://www.reuters.com/places/world/flooding" target="_blank" rel="noopener">Reuters — Flooding news</a>
+              <a href="https://ndma.gov.in" target="_blank" rel="noopener">NDMA India — Alerts & advisories</a>
+            </div>
+          </div>
+
+          <div class="extra" style="margin-top:12px">
+            <h4 style="margin:6px 0">Books & Resources</h4>
+            <div class="list-links">
+              <a href="https://www.ready.gov/floods" target="_blank" rel="noopener">Ready.gov — Floods</a>
+              <a href="https://en.wikipedia.org/wiki/Flood" target="_blank" rel="noopener">Flood — Wikipedia</a>
+              <a href="https://www.amazon.in/s?k=flood+preparedness" target="_blank" rel="noopener">Books: Flood preparedness</a>
+            </div>
+          </div>
+
+          <div class="extra" style="margin:12px 0 0 0">
+            <h4 style="margin:6px 0">Quiz & Game</h4>
+            <div id="flood-game" class="game-box" style="margin-top:10px">
+  <h4 style="margin:6px 0">Mini Game — Flood Safety Drill</h4>
+  <p class="small">Navigate to higher ground safely.</p>
+  <button class="game-btn"
+    onclick="document.getElementById('floodFrame').style.display='block'; document.getElementById('floodFrame').src='web.html'">
+    Start Game
+  </button>
+  <iframe id="floodFrame" style="width:100%; height:500px; border:none; margin-top:10px; display:none;"></iframe>
+</div>
+          </div>
+          <div class="extra" style="margin-top:12px">
+  <h4 style="margin:6px 0">Emergency Contacts</h4>
+  <ul style="margin:6px 0 0 18px; line-height:1.6">
+    <li><b>National Emergency Number:</b> 112</li>
+    <li><b>Ambulance:</b> 102 / 108</li>
+    <li><b>Disaster Management (NDMA):</b> 011-26701728 / 26701729</li>
+    <li><b>Police Helpline:</b> 100</li>
+    <li><b>State Helpline (Punjab):</b> 181</li>
+  </ul>
+</div>
+<div class="extra" style="margin-top:12px">
+  <h4>Emergency Contact</h4>
+  <button class="game-btn" onclick="location.href='tel:112'">🚨 SOS — Call Emergency</button>
+  <p class="small">Tap to call the emergency services immediately</p>
+</div>
+
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FIRE -->
+    <section id="fire" class="section" style="display:none">
+      <h2>Fire — Safety & Resources</h2>
+
+      <div class="row">
+        <div class="col">
+          <div class="guidelines">
+            <h4 style="margin:6px 0">Safety Guidelines</h4>
+            <ul>
+              <li>If clothes catch fire — Stop, Drop and Roll.</li>
+              <li>Evacuate using stairs; never use elevators.</li>
+              <li>Call emergency services (112/Fire Dept) immediately when safe.</li>
+            </ul>
+          </div>
+
+          <div class="extra" style="margin-top:10px">
+            <h4 style="margin:6px 0">Images</h4>
+            <div class="images-grid" id="fire-images">
+              <img src= "C:\Users\swath\OneDrive\Documents\fire3.jpg"alt="fire1">
+              <img src="C:\Users\swath\OneDrive\Documents\fire2.jpg" alt="fire2">
+              <img src="C:\Users\swath\OneDrive\Documents\fire1.jpg" alt="fire3">
+            </div>
+          </div>
+
+          <div class="extra" style="margin-top:10px">
+            <h4 style="margin:6px 0">Videos</h4>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <div class="extra" style="margin-top:10px">
+  <h4 style="margin:6px 0">Videos</h4>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+    <!-- Fire Safety Basics -->
+    <div style="flex:1; min-width:260px">
+      <iframe width="100%" height="260"
+        src="https://www.youtube.com/embed/GVBamXXVD30?si=620ImbHEDrWGKDgl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+        title="Fire Safety Basics"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <!-- How to Use Fire Extinguisher -->
+    <div style="flex:1; min-width:260px">
+      <iframe width="100%" height="260"
+        src="https://www.youtube.com/embed/7CzvIArUrRw?si=oixwYuRZaKXAH7mo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+        title="How to Use Fire Extinguisher"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+  </div>
+</div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="extra">
+            <h4 style="margin:6px 0">Latest News</h4>
+            <div class="list-links" id="fire-news">
+              <a href="https://www.bbc.com/news/topics/cz4pr2gd3rqt/fires" target="_blank" rel="noopener">BBC — Fires & wildfires</a>
+              <a href="https://www.reuters.com/subjects/wildfires" target="_blank" rel="noopener">Reuters — Fire news</a>
+              <a href="https://www.fire.gov.in" target="_blank" rel="noopener">National Fire Service (India)</a>
+            </div>
+          </div>
+
+          <div class="extra" style="margin-top:12px">
+            <h4 style="margin:6px 0">Books & Resources</h4>
+            <div class="list-links">
+              <a href="https://en.wikipedia.org/wiki/Fire_safety" target="_blank" rel="noopener">Fire safety — Wikipedia</a>
+              <a href="https://www.ready.gov/fires" target="_blank" rel="noopener">Ready.gov — Fire safety</a>
+              <a href="https://www.amazon.in/s?k=fire+safety+books" target="_blank" rel="noopener">Books: Fire safety & response</a>
+            </div>
+          </div>
+          <div>
+          <div class="extra" style="margin-top:12px">
+            <h4 style="margin:6px 0">Quiz & Game</h4>
+            <div id="fire-quiz" class="quiz-box" aria-live="polite"></div>
+            <div id="fire-game" class="game-box" style="margin-top:10px">
+  <h4 style="margin:6px 0">Mini Game — Escape the Smoke</h4>
+  <p class="small">Choose safe actions to reach the exit.</p>
+
+  <button class="game-btn" onclick="document.getElementById('gameFrame').style.display='block'; document.getElementById('gameFrame').src='web.html'">
+    Start Game
+  </button>
+
+  <iframe id="gameFrame" style="width:100%; height:500px; border:none; margin-top:10px; display:none;"></iframe>
+</div>
+
+          </div>
+          <div class="extra" style="margin-top:12px">
+  <h4 style="margin:6px 0">Emergency Contacts</h4>
+  <ul style="margin:6px 0 0 18px; line-height:1.6">
+    <li><b>National Emergency Number:</b> 112</li>
+    <li><b>Ambulance:</b> 102 / 108</li>
+    <li><b>Disaster Management (NDMA):</b> 011-26701728 / 26701729</li>
+    <li><b>Police Helpline:</b> 100</li>
+    <li><b>State Helpline (Punjab):</b> 181</li>
+  </ul>
+</div>
+<div class="extra" style="margin-top:12px">
+  <h4>Emergency Contact</h4>
+  <button class="game-btn" onclick="location.href='tel:112'">🚨 SOS — Call Emergency</button>
+  <p class="small">Tap to call the emergency services immediately</p>
+</div>
+
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Resources footer -->
+    <section class="section" id="footer-resources">
+      <h2>More resources</h2>
+      <p class="small">This demo includes curated images, videos, news links and books. For live news/images you can integrate an API (newsapi.org / Google Custom Search) or embed dynamic RSS feeds.</p>
+    </section>
+  </main>
+
+  <script>
+    // Sidebar
+    function openSidebar(){ const sb=document.getElementById('mySidebar'); sb.style.width='300px'; sb.setAttribute('aria-hidden','false'); }
+    function closeSidebar(){ const sb=document.getElementById('mySidebar'); sb.style.width='0'; sb.setAttribute('aria-hidden','true'); }
+
+    // Show scenario/section and hide others
+    function showScenario(key){
+      const sections=['ai','all','earthquake','flood','fire'];
+      sections.forEach(s=>{ const el=document.getElementById(s); if(el) el.style.display='none';});
+      const el=document.getElementById(key);
+      if(el) el.style.display='block';
+      closeSidebar();
+      // load quiz for section if it has one
+      if(key==='earthquake') loadQuestion('earthquake');
+      if(key==='flood') loadQuestion('flood');
+      if(key==='fire') loadQuestion('fire');
+    }
+
+    // ------------ QUIZ SYSTEM (per-disaster) ------------
+    // We'll keep the leveled difficulty function (levels 1-30) — but for this UX start we keep small sample banks.
+    let activeCategory = '';      // earthquake | flood | fire
+    let currentLevel = 1;
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function getDifficulty(level){
+      if(level <= 10) return 'easy';
+      if(level <= 20) return 'medium';
+      return 'hard';
+    }
+
+    // Minimal but structured question banks per category.
+    // You can expand these arrays (or load from external JSON) to reach 150+ questions per category.
+    const quizzes = {
+      earthquake: {
+        easy: [
+          { q: "You feel mild shaking in class. What should you do first?", options:["Run outside","Drop, Cover, and Hold On","Stand near a window","Call a friend"], answer:1 },
+          { q: "Books fall from a shelf—safest reaction:", options:["Stay under a sturdy desk","Pick books up quickly","Run toward the shelf","Stand still"], answer:0 },
+          { q: "After shaking stops, immediate action:", options:["Evacuate to open ground","Go back to sleep","Use elevator","Go to basement"], answer:0 },
+          { q: "During aftershocks you should:", options:["Return to dangerous area","Stay in safe open spot","Run to balcony","Stand on table"], answer:1 },
+          { q: "If trapped but can breathe, you should:", options:["Shout constantly","Tap quietly to guide rescuers","Move heavy rubble alone","Light a match"], answer:1 }
+        ],
+        medium: [
+          { q: "You're on the 3rd floor. Best action during quake:", options:["Use lift","Drop and hold","Jump out window","Run downstairs immediately"], answer:1 },
+          { q: "Doorway is a safe place: true or false?", options:["Always safe","Not always, shelter under furniture may be better","Never safe","Only safe outdoors"], answer:1 },
+          { q: "If you smell gas after quake:", options:["Light candle","Turn off gas supply if safe","Ignore","Use phone near leak"], answer:1 },
+          { q: "Evacuation assembly should be:", options:["Open area away from buildings","Near tall glass windows","In parking garage","Under trees with heavy branches"], answer:0 },
+          { q: "First aid priority post-quake is:", options:["Triage serious injuries","Panicking","Looting","Recording video"], answer:0 }
+        ],
+        hard: [
+          { q: "After a large quake, you find a person trapped; they are conscious but pinned. First step:", options:["Try to lift heavy debris alone","Stabilize, call rescue and provide small aid","Give food","Move them immediately"], answer:1 },
+          { q: "Structural damage is suspected—entering building is:", options:["Safe if roof seems OK","Unsafe until cleared by authorities","Fine for quick search","Always safe at night"], answer:1 },
+          { q: "If aftershocks continue and you are outside near power lines, do you:", options:["Stand close under them","Move to safe open area","Lie down under wires","Climb poles"], answer:1 },
+          { q: "To reduce fire risk after quake, you should:", options:["Turn off gas and electricity if you can safely","Light stove","Open gas line","Use generators indoors"], answer:0 },
+          { q: "Best way to signal rescuers if trapped and can't move:", options:["Tap on pipes/walls intermittently","Shout without pause","Remain silent","Vibrate phone continuously without conserving battery"], answer:0 }
+        ]
+      },
+
+      flood: {
+        easy: [
+          { q: "Water rises quickly outside. Best immediate action:", options:["Move to higher ground","Try to drive through","Stand near drains","Collect perishable goods"], answer:0 },
+          { q: "Never do this during flood:", options:["Walk through moving water","Move to roof if necessary","Listen for alerts","Help others"], answer:0 },
+          { q: "If trapped in building and water is rising:", options:["Go to highest safe point","Stay on basement","Ignore warnings","Open all windows"], answer:0 },
+          { q: "Floodwaters can contain:", options:["Clean drinking water","Hazardous objects and sewage","Nothing dangerous","Helpful items only"], answer:1 },
+          { q: "During night flash flood, the safest option is:", options:["Climb to roof or higher area","Try to drive out","Sleep","Collect items"], answer:0 }
+        ],
+        medium: [
+          { q: "Before rainy season you should:", options:["Elevate important items","Store valuables in basement","Ignore weather forecast","Switch off phone"], answer:0 },
+          { q: "If you encounter a flooded road while driving:", options:["Turn around and find safe route","Drive fast through it","Stop and wait mid-road","Try to push car"], answer:0 },
+          { q: "Rescue from moving water should be done by:", options:["Trained teams","Anyone available","Children only","Random passerby"], answer:0 },
+          { q: "When water is contaminated you should:", options:["Filter/boil before drinking","Drink directly","Use tap","Ignore contamination"], answer:0 },
+          { q: "If flood brings chemical odors, you should:", options:["Avoid area and alert authorities","Breathe deeply to check","Collect samples","Cook food nearby"], answer:0 }
+        ],
+        hard: [
+          { q: "You see person swept in current from a bridge. Safest rescue attempt:", options:["Throw a rope or floatation from safe bank","Jump immediately into current","Drive near edge and shout","Push other people in"], answer:0 },
+          { q: "If forced to shelter on roof, you should:", options:["Signal for rescue and conserve water","Jump into water for quick exit","Light large fire","Consume all food quickly"], answer:0 },
+          { q: "Flood affected area requires sanitation. Priority is:", options:["Install temporary toilets and safe water distribution","Relax and re-open markets","Invite tourists","Hold parties"], answer:0 },
+          { q: "During prolonged flood, best long-term household step:", options:["Move critical appliances to higher floors","Store in ground floor","Use basement more","Ignore structural damage"], answer:0 },
+          { q: "When a dam upstream is at risk, you should:", options:["Evacuate immediately on official order","Stay and monitor","Use small boat for fun","Ignore sirens"], answer:0 }
+        ]
+      },
+
+      fire: {
+        easy: [
+          { q: "Smoke in room — you should:", options:["Stand upright and run","Stay low and crawl to exit","Wait for smoke to clear","Open windows wide"], answer:1 },
+          { q: "If clothes catch fire:", options:["Run fast","Stop, Drop and Roll","Call someone","Hide"], answer:1 },
+          { q: "During building fire you should not:", options:["Use elevator","Use stairs","Follow trained marshals","Cover nose with cloth"], answer:0 },
+          { q: "If extinguisher nearby for small fire, first:", options:["Ensure you have escape route and that it's small enough to tackle","Throw water blindly","Stand close and try to stomp","Open doors to ventilate"], answer:0 },
+          { q: "The main danger from smoke is:", options:["Inhalation and toxic gases","It is harmless","It clears quickly","It improves visibility"], answer:0 }
+        ],
+        medium: [
+          { q: "Electrical fire requires:", options:["Water","A proper Class C extinguisher or switch off power","Throw cloth","Use petrol"], answer:1 },
+          { q: "If exit is blocked by fire, you should:", options:["Look for alternative safe exit or shelter in place and signal rescuers","Break window and jump blindly","Hide under bed","Wait quietly"], answer:0 },
+          { q: "If someone is unconscious after smoke exposure:", options:["Call emergency services and start basic first aid if trained","Ignore them","Shake them vigorously only","Use water to revive"], answer:0 },
+          { q: "To reduce fire spread you should:", options:["Keep flammable materials away from heat sources","Stack combustibles near stove","Block doors open","Store gasoline indoors"], answer:0 },
+          { q: "Fire drills are practiced so that:", options:["Everyone knows evacuation route and assembly point","People panic more","It wastes time","Only staff participate"], answer:0 }
+        ],
+        hard: [
+          { q: "During wildfire smoke reaching city, best household action:", options:["Seal windows/doors, use air purifiers and follow official advisories","Open all windows","Burn more material to create smoke","Ignore warnings"], answer:0 },
+          { q: "If trapped on upper floor with smoke below, you should:", options:["Stay near a window to signal and follow instructions from rescuers","Jump immediately","Keep doors closed and wait for rescue","Try to extinguish large external fire"], answer:0 },
+          { q: "When investigating small lab fire, the correct course is:", options:["Use correct extinguisher and alert authorities","Pour water regardless of class","Tackle without gear","Open doors widely"], answer:0 },
+          { q: "To reduce risks in kitchens at school:", options:["Train staff on extinguisher use and keep extinguishers maintained","Ignore maintenance","Allow open flames unattended","Block exits"], answer:0 },
+          { q: "If a gas-fed fire grows quickly indoors you should:", options:["Evacuate immediately and call firefighters","Try to smother without training","Open all doors to ventilate","Run across room"], answer:0 }
+        ]
+      }
+    };
+
+    function startQuiz(category){
+      activeCategory = category;
+      currentLevel = 1;
+      currentQuestionIndex = 0;
+      score = 0;
+      showScenario(category);
+      loadQuestion(category);
+    }
+
+    function loadQuestion(category){
+      if(!category) category = activeCategory;
+      if(!category) return;
+      const difficulty = getDifficulty(currentLevel);
+      const bank = quizzes[category][difficulty];
+      if(!bank || bank.length === 0){
+        document.getElementById(category + "-quiz").innerHTML = "<div class='small'>No questions available for this slot.</div>";
+        return;
+      }
+      const q = bank[currentQuestionIndex % bank.length];
+      const container = document.getElementById(category + "-quiz");
+      container.innerHTML = `
+        <div class="level-info">Level ${currentLevel} · Difficulty: ${difficulty.toUpperCase()}</div>
+        <div class="question">Q${currentQuestionIndex+1}. ${escapeHtml(q.q)}</div>
+        <div class="options">
+          ${q.options.map((o,i)=>`<button class="opt-btn" onclick="handleAnswer('${category}', ${i})">${escapeHtml(o)}</button>`).join('')}
+        </div>
+        <div class="scoreline">Score: ${score}</div>
+      `;
+    }
+
+    function handleAnswer(category, selectedIndex){
+      const difficulty = getDifficulty(currentLevel);
+      const bank = quizzes[category][difficulty];
+      const q = bank[currentQuestionIndex % bank.length];
+      if(selectedIndex === q.answer){
+        score += 10;
+        flashMessage(category + "-quiz", "✅ Correct! +10", true);
+      } else {
+        flashMessage(category + "-quiz", `❌ Wrong — correct: ${q.options[q.answer]}`, false);
+      }
+      currentQuestionIndex++;
+      // level progression: 5 questions per level
+      if(currentQuestionIndex >= 5){
+        currentLevel++;
+        currentQuestionIndex = 0;
+        if(currentLevel <= 30){
+          setTimeout(()=>{ alert('Level up! Now Level ' + currentLevel); loadQuestion(category); }, 600);
+          return;
+        } else {
+          setTimeout(()=>{ alert('🏆 You completed all levels! Final score: ' + score); currentLevel=1; score=0; loadQuestion(category); }, 600);
+          return;
+        }
+      }
+      // next question
+      setTimeout(()=> loadQuestion(category), 700);
+    }
+
+    // simple flash message in quiz box
+    function flashMessage(containerId, text, positive){
+      const container = document.getElementById(containerId);
+      const div = document.createElement('div');
+      div.textContent = text;
+      div.style.padding = '8px';
+      div.style.borderRadius = '6px';
+      div.style.marginTop = '8px';
+      div.style.fontWeight = '700';
+      div.style.color = positive ? '#0b6623' : '#8a1f11';
+      container.prepend(div);
+      setTimeout(()=>div.remove(),1200);
+    }
+
+    // escape for safety
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // ------------ MINI GAMES (per-category) ------------
+    function playGame(category){
+      const resultEl = document.getElementById(category + "-game-result");
+      resultEl.textContent = "Playing the mini-game...";
+      // Simple timed reaction game: user should click the displayed safe object quickly.
+      // Here we simulate the random success/failure for demo.
+      setTimeout(()=>{
+        const success = Math.random() > 0.45; // ~55% success
+        if(success){
+          resultEl.textContent = "🎯 Success! You earned +5 points.";
+          score += 5;
+        } else {
+          resultEl.textContent = "💥 Game failed — try again.";
+        }
+        // Update displayed quiz score if category is active
+        const qEl = document.getElementById(category + "-quiz");
+        if(qEl) {
+          const scoreline = qEl.querySelector('.scoreline');
+          if(scoreline) scoreline.textContent = 'Score: ' + score;
+        }
+      }, 900);
+    }
+
+    // initialize default
+    showScenario('all');
+    // optionally preload one category quiz
+    // loadQuestion('earthquake');
+
+  </script>
+
+
+  
+
+</body>
+</html>
